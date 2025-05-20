@@ -1,0 +1,3 @@
+PyQt6
+pyttsx3
+pypiwin32 ; sys_platform == 'win32'
