@@ -1,4 +1,4 @@
-# core/dice_logic
+# core/dice_logic.py
 import random
 
 class Dice:
@@ -11,7 +11,7 @@ class Dice:
 
     self.sides = sides
 
-  def roll(self)->:
+  def roll(self)-> int:
     return random.randint(1, self.sides)
     
   def __str__(self):

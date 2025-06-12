@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
     )
     for sides, button in self.dice_buttons.items():
       die = Dice(sides=sides)
-      button.click.connect(self._create_roll_handler(die))
+      button.clicked.connect(self._create_roll_handler(die))
 
   def _create_roll_handler(self, dice_to_roll: Dice):
     def handler():
