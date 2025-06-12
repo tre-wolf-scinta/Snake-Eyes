@@ -12,8 +12,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
-from .shortcuts import setup_nav_shortcuts
 from PyQt6.QtGui import QFocusEvent
+
+from .shortcuts import setup_nav_shortcuts
+from core.dice_logic import Dice
+from core.announcer import announce
 
 # Custom label class definition
 class FocusableLabel(QLabel):
@@ -39,7 +42,10 @@ class MainWindow(QMainWindow):
 
     self.setWindowTitle("SnakeEyes - Accessible Dice Roller")
     self.resize(800, 600)
+    self._setup_ui()
+    self._connect_signals()
 
+  def _setup_ui(self):
 # Creating menu bar
     menu_bar = self.menuBar()
 # Add menus to menu bar with hot key bindings
@@ -66,17 +72,16 @@ class MainWindow(QMainWindow):
 
 # Using grid layout for displaying buttons
     button_layout = QGridLayout()
-# Add button labels to an array
-    dice_labels = ["D4", "D6", "D8", "D10", "D12", "D20"] 
-
-# Add buttons with labels to grid
-    positions = [(row, col) for row in range(2) for col in range(3)]
-
-    for position, text in zip(positions, dice_labels):
-      button = QPushButton(text)
-      button.setMinimumSize(100, 50) 
-      #button.setAccessibleName("Roll a " + text)
+    self.dice_buttons = {}
+    dice_types = [20, 12, 10, 8, 6, 4]
+    positions = [(row, col) for row in range(3) for col in range(2)]
+    for position, sides in zip(positions, dice_types):
+      button_text = f"D{sides}"
+      button = QPushButton(button_text)
+      button.setMinimumSize(100, 50)
       button_layout.addWidget(button, position[0], position[1])
+      self.dice_buttons[sides] = button
+
 # Add grid of buttons under the label heading in the main vertical layout
     main_layout.addLayout(button_layout)
 # Set main layout to main container widget
@@ -85,9 +90,18 @@ class MainWindow(QMainWindow):
 # Add main container to the central widget of MainWindow
     self.setCentralWidget(main_container)
 
-# Set navigation shortcuts for main window
+  def _connect_signals(self):    
     setup_nav_shortcuts(
       parent_window = self,
       sidebar_widget = self.tools_list,
       main_content_widget = self.dice_bag_header
     )
+    for sides, button in self.dice_buttons.items():
+      die = Dice(sides=sides)
+      button.click.connect(self._create_roll_handler(die))
+
+  def _create_roll_handler(self, dice_to_roll: Dice):
+    def handler():
+      result = dice_to_roll.roll()
+      announce(f"You rolled a {dice_to_roll} and got a {result}")
+    return handler
