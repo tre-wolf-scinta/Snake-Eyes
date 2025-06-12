@@ -13,6 +13,24 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 from .shortcuts import setup_nav_shortcuts
+from PyQt6.QtGui import QFocusEvent
+
+# Custom label class definition
+class FocusableLabel(QLabel):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.default_style = "font-size: 24px; font-weight: bold; color: black;"
+    self.focused_style = "font-size: 24px; font-weight: bold; color: black; background-color: #a8d8ff;"
+    self.setStyleSheet(self.default_style)
+    self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+  def focusInEvent(self, event: QFocusEvent):
+    self.setStyleSheet(self.focused_style)
+    super().focusInEvent(event)
+
+  def focusOutEvent(self, event: QFocusEvent):
+    self.setStyleSheet(self.default_style)
+    super().focusOutEvent(event)
 
 # MainWindow class definition
 class MainWindow(QMainWindow):
@@ -41,10 +59,8 @@ class MainWindow(QMainWindow):
     main_container = QWidget()
 # Using VBoxLayout to stack label heading on top of buttons 
     main_layout = QVBoxLayout()
-# Create QLabel to put on top of main content area
-    self.dice_bag_header = QLabel("Dice Bag")
-# Make label focusable 
-    self.dice_bag_header.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+# Use custom FocusableLabel to put on top of main content area
+    self.dice_bag_header = FocusableLabel("Dice Bag")
 # Add header label to main layout
     main_layout.addWidget(self.dice_bag_header)
 
